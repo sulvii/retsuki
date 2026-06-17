@@ -1,0 +1,1 @@
+ALTER TABLE `kingdoms` ADD `last_daily_claimed` integer DEFAULT 0 NOT NULL;

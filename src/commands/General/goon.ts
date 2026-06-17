@@ -8,7 +8,7 @@ import {
   name: 'goon',
   description: 'Uh...'
 })
-export default class PingCommand extends Command {
+export default class GoonCommand extends Command {
 
   override async run(ctx: CommandContext) {    ;
 
