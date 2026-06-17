@@ -22,6 +22,13 @@
       "when": 1781689305895,
       "tag": "0002_chief_terrax",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1781690986150,
+      "tag": "0003_clever_lionheart",
+      "breakpoints": true
     }
   ]
 }
