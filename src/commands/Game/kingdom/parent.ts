@@ -5,7 +5,7 @@ import { DeleteCommand } from "./delete.command";
 
 @Declare({
 	name: "kingdom",
-	description: "kingdom command"
+	description: "kingdom command",
 })
 @Options([CreateCommand, StatsCommand, DeleteCommand])
 export default class AccountCommand extends Command {}

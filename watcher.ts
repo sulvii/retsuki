@@ -1,9 +1,9 @@
-import { Watcher, type WatcherOptions } from '@slipher/watcher'
+import { Watcher, type WatcherOptions } from "@slipher/watcher";
 
 // @ts-expect-error
 const watcherOptions: WatcherOptions = {
-    srcPath: './src',
-    debug: true,
-}
+	srcPath: "./src",
+	debug: true,
+};
 
-export const watcher = new Watcher(watcherOptions)
+export const watcher = new Watcher(watcherOptions);
