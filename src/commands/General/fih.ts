@@ -1,9 +1,18 @@
-import { Command, Declare, type CommandContext } from "seyfert";
+import { Cooldown, CooldownType } from "@slipher/cooldown";
+import { Command, Declare, Middlewares, type CommandContext } from "seyfert";
 
 @Declare({
 	name: "fih",
 	description: "Fih you say...",
 })
+@Cooldown({
+	type: CooldownType.User,
+	interval: 1000 * 15,
+	uses: {
+		default: 1,
+	},
+})
+@Middlewares(["cooldown"])
 export default class FihCommand extends Command {
 	override async run(ctx: CommandContext) {
 		const fihImage =

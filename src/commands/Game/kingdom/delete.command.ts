@@ -4,17 +4,27 @@ import {
 	type CommandContext,
 	Declare,
 	Embed,
+	Middlewares,
 	SubCommand,
 } from "seyfert";
 import { ButtonStyle } from "seyfert/lib/types";
 import { db } from "../../../db/db";
 import { kingdoms } from "../../../db/schema";
 import { eq } from "drizzle-orm";
+import { Cooldown, CooldownType } from "@slipher/cooldown";
 
 @Declare({
 	name: "delete",
 	description: "Delete your kingdom forever",
 })
+@Cooldown({
+	type: CooldownType.User,
+	interval: 1000 * 15,
+	uses: {
+		default: 1,
+	},
+})
+@Middlewares(["cooldown"])
 export class DeleteCommand extends SubCommand {
 	async run(ctx: CommandContext) {
 		const userId = ctx.author.id;

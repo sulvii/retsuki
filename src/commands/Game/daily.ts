@@ -1,7 +1,14 @@
-import { Command, Declare, type CommandContext } from "seyfert";
+import {
+	Command,
+	Declare,
+	Middlewares,
+	WebhookMessage,
+	type CommandContext,
+} from "seyfert";
 import { db } from "../../db/db";
 import { kingdoms } from "../../db/schema";
 import { eq } from "drizzle-orm";
+import { Cooldown, CooldownType } from "@slipher/cooldown";
 
 const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24h
 
@@ -9,6 +16,14 @@ const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24h
 	name: "daily",
 	description: "Claim your daily!",
 })
+@Cooldown({
+	type: CooldownType.User,
+	interval: 1000 * 15,
+	uses: {
+		default: 1,
+	},
+})
+@Middlewares(["cooldown"])
 export default class DailyCommand extends Command {
 	override async run(ctx: CommandContext) {
 		const userId = ctx.author.id;
@@ -53,5 +68,18 @@ export default class DailyCommand extends Command {
 		return ctx.editOrReply({
 			content: `✅ You claimed your daily reward of **${reward}** revenue! Come back tomorrow.`,
 		});
+	}
+
+	override async onMiddlewaresError(context: CommandContext, error: string) {
+		const reply = await context.editOrReply({ content: error });
+
+		// @ts-expect-error
+		const inCooldown = context.client.cooldown.context(context);
+
+		if (typeof inCooldown === "number") {
+			setTimeout(async () => {
+				await (reply as WebhookMessage).delete();
+			}, inCooldown);
+		}
 	}
 }

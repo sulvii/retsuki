@@ -2,6 +2,7 @@ import {
 	type CommandContext,
 	Declare,
 	Embed,
+	Middlewares,
 	Options,
 	SubCommand,
 	createStringOption,
@@ -16,6 +17,7 @@ import {
 	Regions,
 	type Location,
 } from "../../../db/data/locations";
+import { Cooldown, CooldownType } from "@slipher/cooldown";
 
 const regionChoices = [
 	{ name: "🏜️ Desert", value: String(Regions.Desert) },
@@ -83,6 +85,14 @@ const regionLabel: Record<Regions, string> = {
 	name: "create",
 	description: "Create a new kingdom",
 })
+@Cooldown({
+	type: CooldownType.User,
+	interval: 1000 * 15,
+	uses: {
+		default: 1,
+	},
+})
+@Middlewares(["cooldown"])
 @Options(options)
 export class CreateCommand extends SubCommand {
 	async run(ctx: CommandContext<typeof options>) {

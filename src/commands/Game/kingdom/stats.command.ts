@@ -1,4 +1,10 @@
-import { type CommandContext, Declare, Embed, SubCommand } from "seyfert";
+import {
+	type CommandContext,
+	Declare,
+	Embed,
+	Middlewares,
+	SubCommand,
+} from "seyfert";
 import { Formatter } from "seyfert";
 import { TimestampStyle } from "seyfert/lib/common";
 import { db } from "../../../db/db";
@@ -9,6 +15,7 @@ import {
 	LocationType,
 	type Location,
 } from "../../../db/data/locations";
+import { Cooldown, CooldownType } from "@slipher/cooldown";
 
 const regionEmoji: Record<Regions, string> = {
 	[Regions.Desert]: "🏜️",
@@ -52,6 +59,14 @@ const locationTypeLabel: Record<LocationType, string> = {
 	name: "stats",
 	description: "View stats of your kingdom!",
 })
+@Cooldown({
+	type: CooldownType.User,
+	interval: 1000 * 15,
+	uses: {
+		default: 1,
+	},
+})
+@Middlewares(["cooldown"])
 export class StatsCommand extends SubCommand {
 	async run(ctx: CommandContext) {
 		const userId = ctx.author.id;

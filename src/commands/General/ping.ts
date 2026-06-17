@@ -1,7 +1,9 @@
+import { Cooldown, CooldownType } from "@slipher/cooldown";
 import {
 	Client,
 	Command,
 	Declare,
+	Middlewares,
 	Options,
 	createBooleanOption,
 	type CommandContext,
@@ -13,7 +15,14 @@ const options = {
 		description: "Hide the command's response",
 	}),
 };
-
+@Cooldown({
+	type: CooldownType.User,
+	interval: 1000 * 15,
+	uses: {
+		default: 1,
+	},
+})
+@Middlewares(["cooldown"])
 @Declare({
 	name: "ping",
 	description: "Show latency with Discord",

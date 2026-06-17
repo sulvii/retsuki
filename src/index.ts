@@ -1,11 +1,17 @@
 import "../watcher";
-import { Client, type ParseClient, type UsingClient } from "seyfert";
+import {
+	Client,
+	type ParseClient,
+	type ParseMiddlewares,
+	type UsingClient,
+} from "seyfert";
 import { HandleCommand } from "seyfert/lib/commands/handle";
 import { Yuna } from "yunaforseyfert";
 import { db } from "./db/db";
 import { guilds } from "./db/schema";
 import { eq } from "drizzle-orm";
 import { CooldownManager } from "@slipher/cooldown";
+import { middlewares } from "./middlewares";
 
 const client = new Client({
 	commands: {
@@ -30,19 +36,21 @@ class YunaHandler extends HandleCommand {
 
 client.setServices({
 	handleCommand: YunaHandler,
+	middlewares,
 });
 
 client.db = db;
 
-await client.start();
+await client.start().then(() => {
+	client.uploadCommands({ cachePath: "./commands.json" });
 
-client.uploadCommands({ cachePath: "./commands.json" });
-
-// @ts-expect-error I asked seyfert team to fix it.
-client.cooldown = new CooldownManager(client);
-
+	// @ts-expect-error I asked seyfert team to fix it.
+	client.cooldown = new CooldownManager(client);
+});
 declare module "seyfert" {
 	interface UsingClient extends ParseClient<Client<true>> {}
+	interface RegisteredMiddlewares
+		extends ParseMiddlewares<typeof middlewares> {} // add this
 	interface Client {
 		db: typeof db;
 		cooldown: CooldownManager;
