@@ -19,6 +19,7 @@
 		"@libsql/client": "^0.17.3",
 		"@slipher/cooldown": "^0.0.7",
 		"drizzle-orm": "^0.45.2",
+		"nanoid": "^5.1.11",
 		"seyfert": "^4.3.0",
 		"yunaforseyfert": "^1.1.3"
 	}

@@ -8,13 +8,14 @@ import {
 import { Formatter } from "seyfert";
 import { TimestampStyle } from "seyfert/lib/common";
 import { db } from "../../../db/db";
-import { kingdoms } from "../../../db/schema";
+import { kingdoms, citizens } from "../../../db/schema";
 import { eq } from "drizzle-orm";
 import {
 	Regions,
 	LocationType,
 	type Location,
 } from "../../../db/data/locations";
+import { CitizenRoles } from "../../../db/data/roles";
 import { Cooldown, CooldownType } from "@slipher/cooldown";
 
 const regionEmoji: Record<Regions, string> = {
@@ -53,6 +54,30 @@ const locationTypeLabel: Record<LocationType, string> = {
 	[LocationType.Market]: "Market",
 	[LocationType.Fort]: "Fort",
 	[LocationType.Harbor]: "Harbor",
+};
+
+export const citizenRoleEmoji: Record<CitizenRoles, string> = {
+	[CitizenRoles.Miner]: "⛏️",
+	[CitizenRoles.Farmer]: "🌾",
+	[CitizenRoles.Warrior]: "⚔️",
+	[CitizenRoles.Alchemist]: "⚗️",
+	[CitizenRoles.WeaponSmith]: "🔨",
+	[CitizenRoles.ArmorSmith]: "🛡️",
+	[CitizenRoles.Archer]: "🏹",
+	[CitizenRoles.Knight]: "🗡️",
+	[CitizenRoles.Merchant]: "🛒",
+};
+
+export const citizenRoleLabel: Record<CitizenRoles, string> = {
+	[CitizenRoles.Miner]: "Miner",
+	[CitizenRoles.Farmer]: "Farmer",
+	[CitizenRoles.Warrior]: "Warrior",
+	[CitizenRoles.Alchemist]: "Alchemist",
+	[CitizenRoles.WeaponSmith]: "Weapon Smith",
+	[CitizenRoles.ArmorSmith]: "Armor Smith",
+	[CitizenRoles.Archer]: "Archer",
+	[CitizenRoles.Knight]: "Knight",
+	[CitizenRoles.Merchant]: "Merchant",
 };
 
 @Declare({
@@ -111,6 +136,30 @@ export class StatsCommand extends SubCommand {
 						)
 						.join("\n");
 
+		const allCitizens = db
+			.select()
+			.from(citizens)
+			.where(eq(citizens.kingdomId, kingdom.kingdomId))
+			.all();
+
+		const roleCounts = new Map<CitizenRoles, number>();
+		for (const citizen of allCitizens) {
+			const role = citizen.role as CitizenRoles;
+			roleCounts.set(role, (roleCounts.get(role) ?? 0) + 1);
+		}
+
+		const citizensField =
+			roleCounts.size === 0
+				? "*No citizens yet~*"
+				: [...roleCounts.entries()]
+						.map(([role, count]) => {
+							const label = citizenRoleLabel[role];
+							const emoji = citizenRoleEmoji[role];
+							const plural = count === 1 ? label : `${label}s`;
+							return `${emoji} **${count}** ${plural}`;
+						})
+						.join("\n");
+
 		const embed = new Embed()
 			.setColor(0xffb7c5)
 			.setAuthor({ name: `${ctx.author.username}'s Kingdom` })
@@ -135,7 +184,12 @@ export class StatsCommand extends SubCommand {
 				{
 					name: `🏘️ Locations (${locations.length})`,
 					value: locationsField,
-					inline: false,
+					inline: true,
+				},
+				{
+					name: `👥 Citizens (${allCitizens.length})`,
+					value: citizensField,
+					inline: true,
 				},
 			)
 			.setFooter({ text: "✿ keep growing your kingdom ✿" })

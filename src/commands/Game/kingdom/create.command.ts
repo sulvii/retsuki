@@ -8,7 +8,7 @@ import {
 	createStringOption,
 } from "seyfert";
 import { db } from "../../../db/db";
-import { users, kingdoms } from "../../../db/schema";
+import { users, kingdoms, citizens } from "../../../db/schema";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import {
@@ -17,7 +17,10 @@ import {
 	Regions,
 	type Location,
 } from "../../../db/data/locations";
+import { CitizenRoles } from "../../../db/data/roles";
+import { generateCitizenId } from "../../../db/utils";
 import { Cooldown, CooldownType } from "@slipher/cooldown";
+import { citizenRoleEmoji, citizenRoleLabel } from "./stats.command";
 
 const regionChoices = [
 	{ name: "🏜️ Desert", value: String(Regions.Desert) },
@@ -81,6 +84,15 @@ const regionLabel: Record<Regions, string> = {
 	[Regions.Valley]: "🏔️ Valley",
 };
 
+// Maps a location type to the citizen role it spawns (if any)
+const locationTypeToCitizenRole: Partial<Record<LocationType, CitizenRoles>> = {
+	[LocationType.Mine]: CitizenRoles.Miner,
+	[LocationType.Farm]: CitizenRoles.Farmer,
+	[LocationType.Market]: CitizenRoles.Merchant,
+	[LocationType.Harbor]: CitizenRoles.Merchant,
+	[LocationType.Fort]: CitizenRoles.Warrior,
+};
+
 @Declare({
 	name: "create",
 	description: "Create a new kingdom",
@@ -126,9 +138,11 @@ export class CreateCommand extends SubCommand {
 
 		db.insert(users).values({ userId }).onConflictDoNothing().run();
 
+		const kingdomId = randomUUID();
+
 		db.insert(kingdoms)
 			.values({
-				kingdomId: randomUUID(),
+				kingdomId,
 				name,
 				revenue: 0,
 				userId,
@@ -136,6 +150,17 @@ export class CreateCommand extends SubCommand {
 				locations: JSON.stringify(startingLocations),
 			})
 			.run();
+
+		// Insert one starting citizen per location that has a mapped role
+		const startingCitizens = [typeA, typeB].flatMap((locType) => {
+			const role = locationTypeToCitizenRole[locType];
+			if (role === undefined) return [];
+			return [{ citizenId: generateCitizenId(), role, kingdomId }];
+		});
+
+		if (startingCitizens.length > 0) {
+			db.insert(citizens).values(startingCitizens).run();
+		}
 
 		const displayName = ctx.guildId
 			? (
@@ -150,6 +175,10 @@ export class CreateCommand extends SubCommand {
 				(l) =>
 					`${locationTypeEmoji[l.type]} ${l.name} — ${locationTypeLabel[l.type]}`,
 			)
+			.join("\n");
+
+		const citizensValue = startingCitizens
+			.map((c) => `${citizenRoleEmoji[c.role]} ${citizenRoleLabel[c.role]}`)
 			.join("\n");
 
 		const embed = new Embed()
@@ -175,6 +204,11 @@ export class CreateCommand extends SubCommand {
 				{
 					name: "🏘️ Starting Locations",
 					value: locationsValue,
+					inline: false,
+				},
+				{
+					name: `👥 Starting Citizens (${startingCitizens.length})`,
+					value: citizensValue || "*none*",
 					inline: false,
 				},
 			)

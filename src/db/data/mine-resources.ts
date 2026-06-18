@@ -1,0 +1,80 @@
+export const MINING_RESOURCES = [
+	{
+		name: "Stone",
+		rarity: "Common",
+		findChance: 0.6,
+		sellWorth: 25,
+	},
+	{
+		name: "Coal",
+		rarity: "Common",
+		findChance: 0.5,
+		sellWorth: 40,
+	},
+	{
+		name: "Clay",
+		rarity: "Common",
+		findChance: 0.45,
+		sellWorth: 30,
+	},
+	{
+		name: "Iron Ore",
+		rarity: "Uncommon",
+		findChance: 0.3,
+		sellWorth: 120,
+	},
+	{
+		name: "Copper Ore",
+		rarity: "Uncommon",
+		findChance: 0.28,
+		sellWorth: 140,
+	},
+	{
+		name: "Tin Ore",
+		rarity: "Uncommon",
+		findChance: 0.25,
+		sellWorth: 130,
+	},
+	{
+		name: "Silver Ore",
+		rarity: "Rare",
+		findChance: 0.12,
+		sellWorth: 600,
+	},
+	{
+		name: "Gold Nugget",
+		rarity: "Rare",
+		findChance: 0.08,
+		sellWorth: 1200,
+	},
+	{
+		name: "Quartz Crystal",
+		rarity: "Rare",
+		findChance: 0.1,
+		sellWorth: 500,
+	},
+	{
+		name: "Mithril Shard",
+		rarity: "Epic",
+		findChance: 0.03,
+		sellWorth: 3500,
+	},
+	{
+		name: "Obsidian Chunk",
+		rarity: "Epic",
+		findChance: 0.04,
+		sellWorth: 3000,
+	},
+	{
+		name: "Ancient Relic Fragment",
+		rarity: "Legendary",
+		findChance: 0.01,
+		sellWorth: 15000,
+	},
+	{
+		name: "Void Crystal",
+		rarity: "Legendary",
+		findChance: 0.005,
+		sellWorth: 30000,
+	},
+];
