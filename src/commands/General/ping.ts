@@ -42,15 +42,19 @@ export default class PingCommand extends Command {
 	}
 
 	override async onMiddlewaresError(context: CommandContext, error: string) {
-		const reply = await context.editOrReply({ content: error });
+		try {
+			const reply = await context.editOrReply({ content: error });
 
-		// @ts-expect-error
-		const inCooldown = context.client.cooldown.context(context);
+			// @ts-expect-error
+			const inCooldown = context.client.cooldown.context(context);
 
-		if (typeof inCooldown === "number") {
-			setTimeout(async () => {
-				await (reply as WebhookMessage).delete();
-			}, inCooldown);
+			if (typeof inCooldown === "number") {
+				setTimeout(async () => {
+					await (reply as WebhookMessage).delete();
+				}, inCooldown);
+			}
+		} catch (error) {
+			return;
 		}
 	}
 }

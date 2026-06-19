@@ -41,6 +41,14 @@ client.setServices({
 
 client.db = db;
 
+process.on("unhandledRejection", (reason, promise) => {
+	console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+process.on("uncaughtException", (error) => {
+	console.error("Uncaught Exception thrown:", error);
+});
+
 await client.start().then(() => {
 	client.uploadCommands({ cachePath: "./commands.json" });
 
