@@ -42,7 +42,11 @@ client.setServices({
 client.db = db;
 
 process.on("unhandledRejection", (reason, promise) => {
-	if (Error.isError(reason) && reason.message.includes("response.delete"))
+	if (
+		Error.isError(reason) &&
+		reason.message.includes("response.delete") &&
+		reason.stack?.includes("inCooldown")
+	)
 		return;
 
 	console.error("Unhandled Rejection at:", promise, "reason:", reason);
