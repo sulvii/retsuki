@@ -24,7 +24,7 @@ const client = new Client({
 				.where(eq(guilds.guildId, message.guildId))
 				.get();
 
-			return ["retsuki", "rs", guild?.prefix ?? "retsuki"];
+			return [...new Set(["retsuki", "rs", "r", guild?.prefix ?? "retsuki"])];
 		},
 		reply: () => true,
 	},
