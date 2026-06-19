@@ -56,12 +56,13 @@ process.on("uncaughtException", (error) => {
 	console.error("Uncaught Exception thrown:", error);
 });
 
-await client.start().then(() => {
-	client.uploadCommands({ cachePath: "./commands.json" });
+await client.start();
 
-	// @ts-expect-error I asked seyfert team to fix it.
-	client.cooldown = new CooldownManager(client);
-});
+await client.uploadCommands({ cachePath: "./commands.json" });
+
+// @ts-expect-error I asked seyfert team to fix it.
+client.cooldown = new CooldownManager(client);
+
 declare module "seyfert" {
 	interface UsingClient extends ParseClient<Client<true>> {}
 	interface RegisteredMiddlewares
