@@ -1,5 +1,11 @@
 import { Cooldown, CooldownType } from "@slipher/cooldown";
-import { Command, Declare, Middlewares, type CommandContext } from "seyfert";
+import {
+	Command,
+	Declare,
+	Middlewares,
+	WebhookMessage,
+	type CommandContext,
+} from "seyfert";
 
 @Declare({
 	name: "goon",
@@ -25,5 +31,18 @@ export default class GoonCommand extends Command {
 		const msg = replies[Math.floor(Math.random() * replies.length)];
 
 		await ctx.write({ content: msg });
+	}
+
+	override async onMiddlewaresError(context: CommandContext, error: string) {
+		const reply = await context.editOrReply({ content: error });
+
+		// @ts-expect-error
+		const inCooldown = context.client.cooldown.context(context);
+
+		if (typeof inCooldown === "number") {
+			setTimeout(async () => {
+				await (reply as WebhookMessage).delete();
+			}, inCooldown);
+		}
 	}
 }

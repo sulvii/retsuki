@@ -6,6 +6,7 @@ import {
 	Embed,
 	Middlewares,
 	SubCommand,
+	WebhookMessage,
 } from "seyfert";
 import { ButtonStyle } from "seyfert/lib/types";
 import { db } from "../../../db/db";
@@ -125,5 +126,18 @@ export class DeleteCommand extends SubCommand {
 
 			return i.update({ embeds: [cancelEmbed], components: [] });
 		});
+	}
+
+	override async onMiddlewaresError(context: CommandContext, error: string) {
+		const reply = await context.editOrReply({ content: error });
+
+		// @ts-expect-error
+		const inCooldown = context.client.cooldown.context(context);
+
+		if (typeof inCooldown === "number") {
+			setTimeout(async () => {
+				await (reply as WebhookMessage).delete();
+			}, inCooldown);
+		}
 	}
 }

@@ -4,6 +4,7 @@ import {
 	Embed,
 	Middlewares,
 	SubCommand,
+	WebhookMessage,
 } from "seyfert";
 import { Formatter } from "seyfert";
 import { TimestampStyle } from "seyfert/lib/common";
@@ -196,5 +197,18 @@ export class StatsCommand extends SubCommand {
 			.setTimestamp();
 
 		return ctx.editOrReply({ embeds: [embed] });
+	}
+
+	override async onMiddlewaresError(context: CommandContext, error: string) {
+		const reply = await context.editOrReply({ content: error });
+
+		// @ts-expect-error
+		const inCooldown = context.client.cooldown.context(context);
+
+		if (typeof inCooldown === "number") {
+			setTimeout(async () => {
+				await (reply as WebhookMessage).delete();
+			}, inCooldown);
+		}
 	}
 }
