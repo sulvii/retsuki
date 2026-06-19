@@ -10,6 +10,7 @@ import { db } from "../../db/db";
 import { kingdoms, resources } from "../../db/schema";
 import { eq } from "drizzle-orm";
 import { Cooldown, CooldownType } from "@slipher/cooldown";
+import { InteractionResponseType, MessageFlags } from "seyfert/lib/types";
 
 const rarityEmoji: Record<string, string> = {
 	Common: "⬜",
@@ -131,19 +132,24 @@ export default class ResourcesCommand extends Command {
 	}
 
 	override async onMiddlewaresError(context: CommandContext, error: string) {
-		try {
-			const reply = await context.editOrReply({ content: error });
+		const response = context.interaction?.isChatInput()
+			? await context.interaction.reply({
+					type: InteractionResponseType.ChannelMessageWithSource,
+					data: {
+						content: error,
+						flags: MessageFlags.Ephemeral,
+					},
+				})
+			: await context.write({
+					content: error,
+				});
+		// @ts-expect-error
+		const inCooldown = context.client.cooldown.context(context);
 
-			// @ts-expect-error
-			const inCooldown = context.client.cooldown.context(context);
-
-			if (typeof inCooldown === "number") {
-				setTimeout(async () => {
-					await (reply as WebhookMessage).delete();
-				}, inCooldown);
-			}
-		} catch (error) {
-			return;
+		if (typeof inCooldown === "number") {
+			setTimeout(async () => {
+				await (response as WebhookMessage).delete();
+			}, inCooldown);
 		}
 	}
 }

@@ -8,7 +8,11 @@ import {
 	SubCommand,
 	WebhookMessage,
 } from "seyfert";
-import { ButtonStyle } from "seyfert/lib/types";
+import {
+	ButtonStyle,
+	InteractionResponseType,
+	MessageFlags,
+} from "seyfert/lib/types";
 import { db } from "../../../db/db";
 import { kingdoms } from "../../../db/schema";
 import { eq } from "drizzle-orm";
@@ -129,19 +133,24 @@ export class DeleteCommand extends SubCommand {
 	}
 
 	override async onMiddlewaresError(context: CommandContext, error: string) {
-		try {
-			const reply = await context.editOrReply({ content: error });
+		const response = context.interaction?.isChatInput()
+			? await context.interaction.reply({
+					type: InteractionResponseType.ChannelMessageWithSource,
+					data: {
+						content: error,
+						flags: MessageFlags.Ephemeral,
+					},
+				})
+			: await context.write({
+					content: error,
+				});
+		// @ts-expect-error
+		const inCooldown = context.client.cooldown.context(context);
 
-			// @ts-expect-error
-			const inCooldown = context.client.cooldown.context(context);
-
-			if (typeof inCooldown === "number") {
-				setTimeout(async () => {
-					await (reply as WebhookMessage).delete();
-				}, inCooldown);
-			}
-		} catch (error) {
-			return;
+		if (typeof inCooldown === "number") {
+			setTimeout(async () => {
+				await (response as WebhookMessage).delete();
+			}, inCooldown);
 		}
 	}
 }
