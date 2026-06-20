@@ -13,10 +13,12 @@ import { eq } from "drizzle-orm";
 import { CooldownManager } from "@slipher/cooldown";
 import { middlewares } from "./middlewares";
 
+const DEFAULT_PREFIXES = ["retsuki", "rs", "r"];
+
 const client = new Client({
 	commands: {
 		prefix: async (message) => {
-			if (!message.guildId) return ["retsuki", "rs", "r"];
+			if (!message.guildId) return DEFAULT_PREFIXES;
 
 			const guild = await db
 				.select({
@@ -32,7 +34,7 @@ const client = new Client({
 				: ([] as string[]);
 
 			return [
-				...new Set(["retsuki", "rs", "r", guild?.prefix ?? "retsuki"]),
+				...new Set([...DEFAULT_PREFIXES, guild?.prefix ?? "retsuki"]),
 			].filter((prefix) => !disabledPrefixes.includes(prefix));
 		},
 		reply: () => true,
@@ -44,6 +46,12 @@ class YunaHandler extends HandleCommand {
 }
 
 client.setServices({
+	// Yuna handler- handles prefix commands with multiple formats.
+	// retsuki help kingdom
+	// retsukihelp kingdom
+	// retsukihelp --command kingdom
+
+	// Very flexible.
 	handleCommand: YunaHandler,
 	middlewares,
 });
@@ -51,6 +59,7 @@ client.setServices({
 client.db = db;
 
 process.on("unhandledRejection", (reason, promise) => {
+	// ignore cooldown-related errors for slash commands
 	if (
 		Error.isError(reason) &&
 		reason.message.includes("response.delete") &&

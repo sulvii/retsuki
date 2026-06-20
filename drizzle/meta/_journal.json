@@ -1,55 +1,55 @@
 {
-  "version": "7",
-  "dialect": "sqlite",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1781337384699,
-      "tag": "0000_windy_the_initiative",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1781688939106,
-      "tag": "0001_oval_la_nuit",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1781689305895,
-      "tag": "0002_chief_terrax",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1781690986150,
-      "tag": "0003_clever_lionheart",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1781797068909,
-      "tag": "0004_premium_grim_reaper",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1781799748342,
-      "tag": "0005_curly_daredevil",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1781932312121,
-      "tag": "0006_brown_invisible_woman",
-      "breakpoints": true
-    }
-  ]
+	"version": "7",
+	"dialect": "sqlite",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "6",
+			"when": 1781337384699,
+			"tag": "0000_windy_the_initiative",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "6",
+			"when": 1781688939106,
+			"tag": "0001_oval_la_nuit",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1781689305895,
+			"tag": "0002_chief_terrax",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "6",
+			"when": 1781690986150,
+			"tag": "0003_clever_lionheart",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "6",
+			"when": 1781797068909,
+			"tag": "0004_premium_grim_reaper",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "6",
+			"when": 1781799748342,
+			"tag": "0005_curly_daredevil",
+			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "6",
+			"when": 1781932312121,
+			"tag": "0006_brown_invisible_woman",
+			"breakpoints": true
+		}
+	]
 }
