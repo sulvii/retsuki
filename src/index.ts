@@ -16,15 +16,24 @@ import { middlewares } from "./middlewares";
 const client = new Client({
 	commands: {
 		prefix: async (message) => {
-			if (!message.guildId) return ["retsuki", "rs"];
+			if (!message.guildId) return ["retsuki", "rs", "r"];
 
 			const guild = await db
-				.select({ prefix: guilds.prefix })
+				.select({
+					prefix: guilds.prefix,
+					disabledPrefixes: guilds.disabledPrefixes,
+				})
 				.from(guilds)
 				.where(eq(guilds.guildId, message.guildId))
 				.get();
 
-			return [...new Set(["retsuki", "rs", "r", guild?.prefix ?? "retsuki"])];
+			const disabledPrefixes = guild?.disabledPrefixes
+				? (JSON.parse(guild.disabledPrefixes) as string[])
+				: ([] as string[]);
+
+			return [
+				...new Set(["retsuki", "rs", "r", guild?.prefix ?? "retsuki"]),
+			].filter((prefix) => !disabledPrefixes.includes(prefix));
 		},
 		reply: () => true,
 	},
@@ -60,13 +69,14 @@ await client.start();
 
 await client.uploadCommands({ cachePath: "./commands.json" });
 
+// Initialize cooldown only once the client is ready because cooldown relies on Interaction/Message which is only available after client is ready.
 // @ts-expect-error I asked seyfert team to fix it.
 client.cooldown = new CooldownManager(client);
 
 declare module "seyfert" {
 	interface UsingClient extends ParseClient<Client<true>> {}
 	interface RegisteredMiddlewares
-		extends ParseMiddlewares<typeof middlewares> {} // add this
+		extends ParseMiddlewares<typeof middlewares> {}
 	interface Client {
 		db: typeof db;
 		cooldown: CooldownManager;

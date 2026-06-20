@@ -6,6 +6,7 @@ import { CitizenRoles } from "../db/data/roles";
 export const guilds = sqliteTable("guilds", {
 	guildId: text("guild_id").primaryKey(),
 	prefix: text("prefix").notNull().default("retsuki"),
+	disabledPrefixes: text("prefix").default("[]"),
 });
 
 export const users = sqliteTable("users", {

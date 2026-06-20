@@ -7,7 +7,6 @@ import {
 } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
 import { guilds } from "../../db/schema";
-import { eq } from "drizzle-orm";
 
 const options = {
 	prefix: createStringOption({
@@ -34,9 +33,15 @@ export default class SetPrefixCommand extends Command {
 		}
 
 		await ctx.client.db
-			.update(guilds)
-			.set({ prefix: newPrefix })
-			.where(eq(guilds.guildId, ctx.guildId!));
+			.insert(guilds)
+			.values({
+				guildId: ctx.guildId!,
+				prefix: newPrefix,
+			})
+			.onConflictDoUpdate({
+				target: guilds.guildId,
+				set: { prefix: newPrefix },
+			});
 
 		return ctx.write({
 			content: `✅ Prefix updated to \`${newPrefix}\``,
