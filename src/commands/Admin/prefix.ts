@@ -37,6 +37,7 @@ export default class SetPrefixCommand extends Command {
 			.values({
 				guildId: ctx.guildId!,
 				prefix: newPrefix,
+				disabledPrefixes: "[]",
 			})
 			.onConflictDoUpdate({
 				target: guilds.guildId,

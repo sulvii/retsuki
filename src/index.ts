@@ -23,19 +23,12 @@ const client = new Client({
 			const guild = await db
 				.select({
 					prefix: guilds.prefix,
-					disabledPrefixes: guilds.disabledPrefixes,
 				})
 				.from(guilds)
 				.where(eq(guilds.guildId, message.guildId))
 				.get();
 
-			const disabledPrefixes = guild?.disabledPrefixes
-				? (JSON.parse(guild.disabledPrefixes) as string[])
-				: ([] as string[]);
-
-			return [
-				...new Set([...DEFAULT_PREFIXES, guild?.prefix ?? "retsuki"]),
-			].filter((prefix) => !disabledPrefixes.includes(prefix));
+			return [...new Set([...DEFAULT_PREFIXES, guild?.prefix ?? "retsuki"])];
 		},
 		reply: () => true,
 	},
@@ -79,7 +72,6 @@ await client.start();
 await client.uploadCommands({ cachePath: "./commands.json" });
 
 // Initialize cooldown only once the client is ready because cooldown relies on Interaction/Message which is only available after client is ready.
-// @ts-expect-error I asked seyfert team to fix it.
 client.cooldown = new CooldownManager(client);
 
 declare module "seyfert" {

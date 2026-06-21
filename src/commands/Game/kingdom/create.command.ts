@@ -146,7 +146,7 @@ export class CreateCommand extends SubCommand {
 			.values({
 				kingdomId,
 				name,
-				revenue: 0,
+				revenue: 500,
 				userId,
 				region,
 				locations: JSON.stringify(startingLocations),
@@ -200,7 +200,7 @@ export class CreateCommand extends SubCommand {
 				},
 				{
 					name: "🪙 Treasury",
-					value: "0 coins",
+					value: "500 coins",
 					inline: true,
 				},
 				{
@@ -232,7 +232,6 @@ export class CreateCommand extends SubCommand {
 			: await context.write({
 					content: error,
 				});
-		// @ts-expect-error
 		const inCooldown = context.client.cooldown.context(context);
 
 		if (typeof inCooldown === "number") {
