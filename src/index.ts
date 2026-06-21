@@ -12,6 +12,7 @@ import { guilds } from "./db/schema";
 import { eq } from "drizzle-orm";
 import { CooldownManager } from "@slipher/cooldown";
 import { middlewares } from "./middlewares";
+import { Client as NekoClient } from "nekos-best.js";
 
 const DEFAULT_PREFIXES = ["retsuki", "rs", "r"];
 
@@ -73,6 +74,8 @@ await client.uploadCommands({ cachePath: "./commands.json" });
 
 // Initialize cooldown only once the client is ready because cooldown relies on Interaction/Message which is only available after client is ready.
 client.cooldown = new CooldownManager(client);
+// Neko is the Anime-Interaction-GIF provider fully for entertainment. Requires interaction so you need to init it after client is ready.
+client.neko = new NekoClient();
 
 declare module "seyfert" {
 	interface UsingClient extends ParseClient<Client<true>> {}
@@ -81,5 +84,6 @@ declare module "seyfert" {
 	interface Client {
 		db: typeof db;
 		cooldown: CooldownManager;
+		neko: NekoClient;
 	}
 }

@@ -1,16 +1,26 @@
 import { Cooldown, CooldownType } from "@slipher/cooldown";
 import {
 	Command,
+	createUserOption,
 	Declare,
+	Embed,
 	Middlewares,
+	Options,
 	WebhookMessage,
 	type CommandContext,
 } from "seyfert";
 import { InteractionResponseType, MessageFlags } from "seyfert/lib/types";
 
+const options = {
+	user: createUserOption({
+		description: "The person you want to hug :)",
+		required: true,
+	}),
+};
+
 @Declare({
-	name: "fih",
-	description: "Fih you say...",
+	name: "hug",
+	description: "Hug someone :3",
 })
 @Cooldown({
 	type: CooldownType.User,
@@ -19,13 +29,32 @@ import { InteractionResponseType, MessageFlags } from "seyfert/lib/types";
 		default: 1,
 	},
 })
+@Options(options)
 @Middlewares(["cooldown"])
 export default class FihCommand extends Command {
-	override async run(ctx: CommandContext) {
-		const fihImage =
-			"https://media.discordapp.net/attachments/771635439345991691/1491043319957164155/fv55b4n.gif?ex=6a2ded8d&is=6a2c9c0d&hm=e9c4ea6a27ad5fda1d12caaf67a336fa73fe8bc98260b4ee3546594f27fc9798&=&width=400&height=266";
+	override async run(ctx: CommandContext<typeof options>) {
+		const { user } = ctx.options;
 
-		await ctx.write({ content: fihImage });
+		const nekoResponse = await ctx.client.neko.fetch("hug", 1);
+		const result = nekoResponse.results[0];
+
+		if (!result) {
+			return ctx.editOrReply({
+				content: `Could not fetch hug GIF :<`,
+			});
+		}
+
+		const embed = new Embed()
+			.setColor("LuminousVividPink")
+			.setTitle(
+				`${ctx.author.globalName || ctx.author.username} hugs ${user.globalName || user.username}! very sweet (. ❛ ᴗ ❛.)`,
+			)
+			.setImage(result.url)
+			.setFooter({ text: `Anime: ${result.anime_name || "N\A"}` });
+
+		return await ctx.editOrReply({
+			embeds: [embed],
+		});
 	}
 
 	override async onMiddlewaresError(context: CommandContext, error: string) {
