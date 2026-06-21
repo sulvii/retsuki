@@ -31,7 +31,7 @@ const options = {
 })
 @Options(options)
 @Middlewares(["cooldown"])
-export default class FihCommand extends Command {
+export default class KissCommand extends Command {
 	override async run(ctx: CommandContext<typeof options>) {
 		const { user } = ctx.options;
 
