@@ -6,6 +6,7 @@ import {
 	createStringOption,
 	createIntegerOption,
 	type CommandContext,
+	type OnOptionsReturnObject,
 } from "seyfert";
 import { db } from "../../db/db";
 import { kingdoms, resources } from "../../db/schema";
@@ -238,5 +239,17 @@ export default class SellCommand extends Command {
 			.setTimestamp();
 
 		return ctx.editOrReply({ embeds: [embed] });
+	}
+
+	override async onOptionsError(
+		context: CommandContext,
+		metadata: OnOptionsReturnObject,
+	) {
+		await context.editOrReply({
+			content: Object.entries(metadata)
+				.filter((_) => _[1].failed)
+				.map((error) => `${error[0]}: ${error[1].value}`)
+				.join("\n"),
+		});
 	}
 }

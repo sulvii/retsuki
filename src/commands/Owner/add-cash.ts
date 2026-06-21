@@ -27,6 +27,7 @@ const options = {
 @Declare({
 	name: "add-cash",
 	description: "Add revenue to a kingdom (developer only) 💸",
+	guildId: [process.env.PRIVATE_GUILD_ID as string],
 })
 @Options(options)
 export default class AddCash extends Command {

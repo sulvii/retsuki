@@ -7,10 +7,10 @@ export default createEvent({
 		client.logger.info(`${user.username} is ready`);
 
 		(client as Client).gateway.setPresence({
-			status: PresenceUpdateStatus.Invisible,
+			status: PresenceUpdateStatus.DoNotDisturb,
 			activities: [
 				{
-					name: "with Kizuren",
+					name: "Playing with You",
 					type: ActivityType.Playing,
 				},
 			],
