@@ -15,7 +15,6 @@ import { Cooldown, CooldownType } from "@slipher/cooldown";
 import { InteractionResponseType, MessageFlags } from "seyfert/lib/types";
 import { CitizenRoles } from "../../db/data/roles";
 
-// More elite roles cost more coins to recruit
 const RECRUIT_COSTS: Record<number, number> = {
 	[CitizenRoles.Miner]: 50,
 	[CitizenRoles.Farmer]: 50,

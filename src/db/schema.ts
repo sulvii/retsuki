@@ -18,6 +18,7 @@ export const kingdoms = sqliteTable("kingdoms", {
 	name: text("name").notNull(),
 	revenue: real("revenue").notNull().default(0),
 	lastDailyClaimed: integer("last_daily_claimed").notNull().default(0),
+	lastBattleAt: integer("last_battle_at").notNull().default(0),
 	userId: text("user_id")
 		.notNull()
 		.unique()
@@ -45,6 +46,35 @@ export const resources = sqliteTable("resources", {
 	quantity: integer("quantity").notNull().default(0),
 	totalSold: integer("total_sold").notNull().default(0),
 });
+
+export const armory = sqliteTable("armory", {
+	kingdomId: text("kingdom_id")
+		.primaryKey()
+		.references(() => kingdoms.kingdomId, { onDelete: "cascade" }),
+	warriorTier: integer("warrior_tier").notNull().default(0),
+	archerTier: integer("archer_tier").notNull().default(0),
+	knightTier: integer("knight_tier").notNull().default(0),
+});
+
+export const battles = sqliteTable("battles", {
+	battleId: text("battle_id").primaryKey(),
+	challengerId: text("challenger_id").notNull(),
+	defenderId: text("defender_id").notNull(),
+	status: text("status").notNull().default("pending"), // pending | deploying | resolved | declined
+	channelId: text("channel_id").notNull(),
+	challengerAllocation: text("challenger_allocation"), // JSON string
+	defenderAllocation: text("defender_allocation"), // JSON string
+	winnerId: text("winner_id"),
+	createdAt: integer("created_at").notNull(),
+	resolvedAt: integer("resolved_at"),
+});
+
+export const armoryRelations = relations(armory, ({ one }) => ({
+	kingdom: one(kingdoms, {
+		fields: [armory.kingdomId],
+		references: [kingdoms.kingdomId],
+	}),
+}));
 
 export const usersRelations = relations(users, ({ one }) => ({
 	kingdom: one(kingdoms, {
@@ -90,3 +120,9 @@ export type InsertCitizen = typeof citizens.$inferInsert;
 
 export type Resource = typeof resources.$inferSelect;
 export type InsertResource = typeof resources.$inferInsert;
+
+export type Armory = typeof armory.$inferSelect;
+export type InsertArmory = typeof armory.$inferInsert;
+
+export type Battle = typeof battles.$inferSelect;
+export type InsertBattle = typeof battles.$inferInsert;
