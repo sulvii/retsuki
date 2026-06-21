@@ -143,7 +143,6 @@ export default class ResourcesCommand extends Command {
 			: await context.write({
 					content: error,
 				});
-		// @ts-expect-error
 		const inCooldown = context.client.cooldown.context(context);
 
 		if (typeof inCooldown === "number") {
