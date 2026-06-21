@@ -7,11 +7,13 @@ import {
 	createIntegerOption,
 	type CommandContext,
 	type OnOptionsReturnObject,
+	WebhookMessage,
 } from "seyfert";
 import { db } from "../../db/db";
 import { kingdoms, resources } from "../../db/schema";
 import { eq, and } from "drizzle-orm";
 import { MINING_RESOURCES } from "../../db/data/mine-resources";
+import { MessageFlags } from "seyfert/lib/types";
 
 const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as const;
 type Rarity = (typeof RARITIES)[number];
@@ -245,11 +247,25 @@ export default class SellCommand extends Command {
 		context: CommandContext,
 		metadata: OnOptionsReturnObject,
 	) {
-		await context.editOrReply({
+		if (context.interaction) {
+			await context.editOrReply({
+				content: Object.entries(metadata)
+					.filter((_) => _[1].failed)
+					.map((error) => `${error[0]}: ${error[1].value}`)
+					.join("\n"),
+				flags: MessageFlags.Ephemeral,
+			});
+		}
+
+		const reply = await context.editOrReply({
 			content: Object.entries(metadata)
 				.filter((_) => _[1].failed)
 				.map((error) => `${error[0]}: ${error[1].value}`)
 				.join("\n"),
 		});
+
+		setTimeout(async () => {
+			await (reply as WebhookMessage).delete();
+		}, 5000);
 	}
 }
