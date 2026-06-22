@@ -9,10 +9,10 @@ function secureRandomIndex(max: number): number {
 	const range = 256;
 	const maxValid = Math.floor(range / max) * max;
 
-	const buf = new Uint8Array(1);
 	let value: number;
 
 	do {
+		const buf = new Uint8Array(1);
 		cryptoObj.getRandomValues(buf);
 		value = buf[0] as number;
 	} while (value >= maxValid);
