@@ -8,6 +8,4 @@ COPY . .
 
 USER bun
 
-RUN mkdir -p /usr/src/app/data
-
 ENTRYPOINT ["sh", "-c", "bun run db:migrate && bun run src/index.ts"]
