@@ -64,7 +64,9 @@ export default class BetCommand extends Command {
 		if (revenue <= 0) {
 			const embed = new Embed()
 				.setColor(0xffb7c5)
-				.setDescription("😢 You have no coins to bet! Earn some with `/mine` first~")
+				.setDescription(
+					"😢 You have no coins to bet! Earn some with `/mine` first~",
+				)
 				.setFooter({ text: "✿ better luck next time ✿" });
 
 			return ctx.editOrReply({ embeds: [embed] });
@@ -90,7 +92,9 @@ export default class BetCommand extends Command {
 			if (betAmount > MAX_BET) {
 				const embed = new Embed()
 					.setColor(0xffb7c5)
-					.setDescription(`❌ You can't bet more than **${MAX_BET}** coins at once!`);
+					.setDescription(
+						`❌ You can't bet more than **${MAX_BET}** coins at once!`,
+					);
 				return ctx.editOrReply({ embeds: [embed] });
 			}
 
