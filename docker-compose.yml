@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    container_name: bun-drizzle-app
+    restart: unless-stopped
+    volumes:
+      - ./data:/usr/src/app/data
+    environment:
+      DATABASE_URL: file:/usr/src/app/data/sqlite.db
