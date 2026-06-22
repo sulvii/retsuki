@@ -33,6 +33,19 @@ const optionTypeNames: Record<ApplicationCommandOptionType, string> = {
 	11: "Attachment",
 };
 
+function capitalize(str: string): string {
+	return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function extractCategory(cmd: Command | ContextMenuCommand): string {
+	const filePath = cmd.__filePath;
+	if (typeof filePath !== "string") return "Misc";
+
+	const parts = filePath.replace(/\\/g, "/").split("/");
+	const cmdIndex = parts.lastIndexOf("commands");
+	return capitalize(parts[cmdIndex + 1] ?? "Misc");
+}
+
 const options = {
 	command: createStringOption({
 		description: "The command you want help with.",
@@ -94,22 +107,39 @@ export default class HelpCommand extends Command {
 			return;
 		}
 
-		const menuOptions = commands
-			.slice(0, 25)
-			.map((cmd) =>
-				new StringSelectOption()
-					.setLabel(cmd.name)
-					.setValue(cmd.name)
-					.setDescription(cmd.description.slice(0, 100))
-					.setEmoji("📚"),
-			);
+		const grouped = new Map<string, Array<Command | ContextMenuCommand>>();
 
-		const row = new ActionRow<StringSelectMenu>().addComponents(
-			new StringSelectMenu()
-				.setCustomId("help-menu")
-				.setPlaceholder("Pick a command, hehe~")
-				.setOptions(menuOptions),
+		for (const cmd of commands) {
+			const category = extractCategory(cmd);
+			if (!grouped.has(category)) grouped.set(category, []);
+			grouped.get(category)!.push(cmd);
+		}
+
+		const sortedCategories = [...grouped.keys()].sort();
+
+		const categoryMenuOptions = sortedCategories.slice(0, 25).map((cat) =>
+			new StringSelectOption()
+				.setLabel(cat)
+				.setValue(`cat:${cat}`)
+				.setDescription(
+					`${grouped.get(cat)!.length} command(s) — click to explore~`,
+				),
 		);
+
+		const categoryRow = new ActionRow<StringSelectMenu>().addComponents(
+			new StringSelectMenu()
+				.setCustomId("help-category")
+				.setPlaceholder("Pick a category~")
+				.setOptions(categoryMenuOptions),
+		);
+
+		const overviewDescription =
+			sortedCategories
+				.map((cat) => {
+					const cmds = grouped.get(cat)!;
+					return `**${cat}**\n${cmds.map((c) => `\`${c.name}\``).join(", ")}`;
+				})
+				.join("\n\n") || "I have no commands yet... how sad. 😢";
 
 		const message = await ctx.write(
 			{
@@ -118,13 +148,10 @@ export default class HelpCommand extends Command {
 						.setColor(EmbedColors.Blurple)
 						.setThumbnail(ctx.author.avatarURL())
 						.setTitle(`✨ ${client.me.username}'s Commands ✨`)
-						.setDescription(
-							commands
-								.map((cmd) => `\`${cmd.name}\` — ${cmd.description}`)
-								.join("\n") || "I have no commands yet... how sad. 😢",
-						),
+						.setDescription(overviewDescription)
+						.setFooter({ text: "Pick a category below to learn more~" }),
 				],
-				components: [row],
+				components: [categoryRow],
 			},
 			true,
 		);
@@ -134,19 +161,68 @@ export default class HelpCommand extends Command {
 			idle: 30_000,
 		});
 
-		collector.run("help-menu", async (i) => {
+		collector.run("help-category", async (i) => {
+			if (!i.isStringSelectMenu()) return;
+
+			const value = i.values[0];
+			if (!value?.startsWith("cat:")) return;
+
+			const cat = value.slice(4);
+			const cmds = grouped.get(cat);
+
+			if (!cmds?.length) {
+				return i.write({
+					content: "Hmm, that category vanished! 👻",
+					flags: MessageFlags.Ephemeral,
+				});
+			}
+
+			const commandMenuOptions = cmds
+				.slice(0, 25)
+				.map((cmd) =>
+					new StringSelectOption()
+						.setLabel(cmd.name)
+						.setValue(cmd.name)
+						.setDescription(cmd.description.slice(0, 100)),
+				);
+
+			const commandRow = new ActionRow<StringSelectMenu>().addComponents(
+				new StringSelectMenu()
+					.setCustomId("help-command")
+					.setPlaceholder("Pick a command, hehe~")
+					.setOptions(commandMenuOptions),
+			);
+
+			await i.update({
+				embeds: [
+					new Embed()
+						.setColor(EmbedColors.Blurple)
+						.setTitle(`✨ ${cat} Commands`)
+						.setDescription(
+							cmds
+								.map((cmd) => `\`${cmd.name}\` — ${cmd.description}`)
+								.join("\n"),
+						)
+						.setFooter({ text: "Pick a command to see its details~" }),
+				],
+				components: [categoryRow, commandRow],
+			});
+		});
+
+		collector.run("help-command", async (i) => {
 			if (!i.isStringSelectMenu()) return;
 
 			const picked = commands.find((cmd) => cmd.name === i.values[0]);
-			if (!picked)
+			if (!picked) {
 				return i.write({
 					content: "Hmm, that command vanished! 👻",
 					flags: MessageFlags.Ephemeral,
 				});
+			}
 
 			await i.update({
 				embeds: [buildCommandEmbed(picked, client.me.username)],
-				components: [row],
+				components: [categoryRow],
 			});
 		});
 	}
