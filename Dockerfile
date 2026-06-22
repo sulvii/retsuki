@@ -7,4 +7,5 @@ RUN bun install
 COPY . .
 
 USER bun
-ENTRYPOINT [ "bun", "run", "src/index.ts" ]
+
+ENTRYPOINT ["sh", "-c", "bun run db:migrate && bun run src/index.ts"]
