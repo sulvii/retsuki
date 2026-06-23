@@ -1,5 +1,6 @@
 import { createMiddleware, Formatter } from "seyfert";
 import { TimestampStyle } from "seyfert/lib/common";
+
 export const cooldown = createMiddleware<void>(
 	async ({ context, next, stop }) => {
 		// @ts-expect-error
